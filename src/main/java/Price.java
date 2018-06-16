@@ -1,7 +1,7 @@
 import java.util.Date;
 import java.util.Objects;
 
-public class Price{
+public class Price implements Comparable<Price>{
     private long id;
     private String productCode;
     private int number;
@@ -92,6 +92,16 @@ public class Price{
                 '}';
     }
 
+    @Override
+    public int compareTo(Price o) {
+        if (getBegin().equals(o.getBegin()))
+            return 0;
+        if (getBegin().after(o.getBegin()))
+            return 1;
+        else
+            return -1;
+    }
+
     public IntersectType intersects(Price other) {
         Date ourBegin = getBegin();
         Date ourEnd = getEnd();
@@ -123,9 +133,8 @@ public class Price{
             }
         }
     }
-
     public enum IntersectType {
         OVERLAPS, OVERLAPPED, OVERLAP_RIGHT, OVERLAP_LEFT, DONT_INTERSECT
-    }
 
+    }
 }
