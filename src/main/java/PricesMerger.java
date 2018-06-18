@@ -23,7 +23,7 @@ public class PricesMerger {
         });
 
         for (Price newPrice : sortedNewPricesMap.keySet()) {
-            if(sortedOldPricesMap.containsKey(newPrice)) {
+            if (sortedOldPricesMap.containsKey(newPrice)) {
                 for (Price price : sortedNewPricesMap.get(newPrice)) {
                     sortedOldPricesMap.get(newPrice).addAll(checkPrices(price, sortedOldPricesMap.get(newPrice), false));
                 }
@@ -54,7 +54,12 @@ public class PricesMerger {
                     if (oldPrices.get(i).getValue() == newPrice.getValue()) {
                         return new LinkedList<>();
                     } else {
-                        forAdd.add(splitPrices(newPrice, oldPrices.get(i)));
+                        if (newPrice.getBegin().equals(oldPrices.get(i).getBegin())) {
+                            oldPrices.get(i).setBegin(newPrice.getEnd());
+                        } else if (newPrice.getEnd().equals(oldPrices.get(i).getEnd())) {
+                            oldPrices.get(i).setEnd(newPrice.getBegin());
+                        } else
+                            forAdd.add(splitPrices(newPrice, oldPrices.get(i)));
                     }
                     break;
                 case OVERLAP_LEFT:

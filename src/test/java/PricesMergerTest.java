@@ -239,11 +239,11 @@ public class PricesMergerTest {
 
         List<Price> newPrices = new ArrayList<>();
 
-        newPrices.add(new Price("12345", 1, 1, conv("04.01.2013 00:00:00"), conv("07.01.2013 23:59:59"), 81));
         newPrices.add(new Price("12345", 1, 1, conv("09.01.2013 23:59:59"), conv("12.01.2013 23:59:59"), 83));
         newPrices.add(new Price("12345", 1, 1, conv("14.01.2013 00:00:00"), conv("17.01.2013 23:59:59"), 85));
-        newPrices.add(new Price("12345", 1, 1, conv("20.01.2013 10:58:00"), conv("20.01.2013 14:36:59"), 81));
+        newPrices.add(new Price("12345", 1, 1, conv("04.01.2013 00:00:00"), conv("07.01.2013 23:59:59"), 81));
         newPrices.add(new Price("12345", 1, 1, conv("19.01.2013 23:59:59"), conv("22.01.2013 23:59:59"), 87));
+        newPrices.add(new Price("12345", 1, 1, conv("20.01.2013 10:58:00"), conv("20.01.2013 14:36:59"), 81));
 
         PricesMerger merger = new PricesMerger();
         List<Price> unionPrices = merger.merge(oldPrices, newPrices);
@@ -287,6 +287,31 @@ public class PricesMergerTest {
 
         assertTrue(unionPrices.contains(new Price("12345", 1, 1, conv("01.01.2013 00:00:00"), conv("05.01.2013 23:59:59"), 80)));
         assertTrue(unionPrices.contains(new Price("789", 1, 1, conv("04.01.2013 00:00:00"), conv("07.01.2013 23:59:59"), 81)));
+    }
+
+    @Test
+    public void testMergePrices2() throws ParseException {
+        List<Price> oldPrices = new ArrayList<>();
+        oldPrices.add(new Price("12345", 1, 1, conv("16.01.2013 00:00:00"), conv("20.01.2013 23:59:59"), 86));
+
+        List<Price> newPrices = new ArrayList<>();
+
+        newPrices.add(new Price("12345", 1, 1, conv("19.01.2013 23:59:59"), conv("22.01.2013 23:59:59"), 87));
+        newPrices.add(new Price("12345", 1, 1, conv("20.01.2013 10:58:00"), conv("20.01.2013 14:36:59"), 81));
+
+        PricesMerger merger = new PricesMerger();
+        List<Price> unionPrices = merger.merge(oldPrices, newPrices);
+        unionPrices.stream()
+                .sorted((p1, p2) -> p1.getBegin().compareTo(p2.getBegin()))
+                .forEach(System.out::println);
+
+
+        assertEquals(4, unionPrices.size());
+
+        assertTrue(unionPrices.contains(new Price("12345", 1, 1, conv("16.01.2013 00:00:00"), conv("19.01.2013 23:59:59"), 87)));
+        assertTrue(unionPrices.contains(new Price("12345", 1, 1, conv("19.01.2013 23:59:59"), conv("20.01.2013 10:58:00"), 87)));
+        assertTrue(unionPrices.contains(new Price("12345", 1, 1, conv("20.01.2013 10:58:00"), conv("20.01.2013 14:36:59"), 81)));
+        assertTrue(unionPrices.contains(new Price("12345", 1, 1, conv("20.01.2013 14:36:59"), conv("22.01.2013 23:59:59"), 87)));
     }
 
 
