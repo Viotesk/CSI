@@ -1,10 +1,14 @@
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class PricesMergerTest {
 
@@ -34,7 +38,7 @@ public class PricesMergerTest {
 
         List<Price> resultMerge = pricesMerger.merge(pricesFromBD, pricesForAdd);
 
-        Assert.assertTrue(compareCollections(expectedList, resultMerge));
+        assertTrue(compareCollections(expectedList, resultMerge));
     }
 
 
@@ -53,7 +57,7 @@ public class PricesMergerTest {
 
         List<Price> resultMerge = pricesMerger.merge(pricesFromBD, pricesForAdd);
 
-        Assert.assertTrue(compareCollections(expectedList, resultMerge));
+        assertTrue(compareCollections(expectedList, resultMerge));
     }
 
     @Test
@@ -71,7 +75,7 @@ public class PricesMergerTest {
 
         List<Price> resultMerge = pricesMerger.merge(pricesFromBD, pricesForAdd);
 
-        Assert.assertTrue(compareCollections(expectedList, resultMerge));
+        assertTrue(compareCollections(expectedList, resultMerge));
     }
 
     @Test
@@ -93,7 +97,7 @@ public class PricesMergerTest {
 
         List<Price> resultMerge = pricesMerger.merge(pricesFromBD, pricesForAdd);
 
-        Assert.assertTrue(compareCollections(expectedList, resultMerge));
+        assertTrue(compareCollections(expectedList, resultMerge));
     }
 
 
@@ -119,7 +123,7 @@ public class PricesMergerTest {
 
         List<Price> resultMerge = pricesMerger.merge(pricesFromBD, pricesForAdd);
 
-        Assert.assertTrue(compareCollections(expectedList, resultMerge));
+        assertTrue(compareCollections(expectedList, resultMerge));
     }
 
     @Test
@@ -148,7 +152,7 @@ public class PricesMergerTest {
 
         List<Price> resultMerge = pricesMerger.merge(pricesFromBD, pricesForAdd);
 
-        Assert.assertTrue(compareCollections(expectedList, resultMerge));
+        assertTrue(compareCollections(expectedList, resultMerge));
     }
 
     @Test
@@ -185,7 +189,7 @@ public class PricesMergerTest {
 
         List<Price> resultMerge = pricesMerger.merge(pricesFromBD, pricesForAdd);
 
-        Assert.assertTrue(compareCollections(expectedList, resultMerge));
+        assertTrue(compareCollections(expectedList, resultMerge));
     }
 
 
@@ -212,4 +216,54 @@ public class PricesMergerTest {
         return true;
     }
 
+    private final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+
+    public Date conv(String in) {
+        Date result = null;
+        try {
+            result = sdf.parse(in);
+        } catch (ParseException ex) {
+            //
+        }
+        return result;
+    }
+
+    @Test
+    public void testMergePrices() throws ParseException {
+        List<Price> oldPrices = new ArrayList<>();
+        oldPrices.add(new Price("12345", 1, 1, conv("01.01.2013 00:00:00"), conv("05.01.2013 23:59:59"), 80));
+        oldPrices.add(new Price("12345", 1, 1, conv("06.01.2013 00:00:00"), conv("10.01.2013 23:59:59"), 82));
+        oldPrices.add(new Price("12345", 1, 1, conv("11.01.2013 00:00:00"), conv("15.01.2013 23:59:59"), 84));
+        oldPrices.add(new Price("12345", 1, 1, conv("16.01.2013 00:00:00"), conv("20.01.2013 23:59:59"), 86));
+        oldPrices.add(new Price("12345", 1, 1, conv("21.01.2013 00:00:00"), conv("25.01.2013 23:59:59"), 88));
+
+        List<Price> newPrices = new ArrayList<>();
+
+        newPrices.add(new Price("12345", 1, 1, conv("04.01.2013 00:00:00"), conv("07.01.2013 23:59:59"), 81));
+        newPrices.add(new Price("12345", 1, 1, conv("09.01.2013 23:59:59"), conv("12.01.2013 23:59:59"), 83));
+        newPrices.add(new Price("12345", 1, 1, conv("14.01.2013 00:00:00"), conv("17.01.2013 23:59:59"), 85));
+        newPrices.add(new Price("12345", 1, 1, conv("20.01.2013 10:58:00"), conv("20.01.2013 14:36:59"), 81));
+        newPrices.add(new Price("12345", 1, 1, conv("19.01.2013 23:59:59"), conv("22.01.2013 23:59:59"), 87));
+
+        PricesMerger merger = new PricesMerger();
+        List<Price> unionPrices = merger.merge(oldPrices, newPrices);
+        unionPrices.stream()
+                .sorted((p1, p2) -> p1.getBegin().compareTo(p2.getBegin()))
+                .forEach(System.out::println);
+
+
+        assertEquals(11, unionPrices.size());
+
+        assertTrue(unionPrices.contains(new Price("12345", 1, 1, conv("01.01.2013 00:00:00"), conv("04.01.2013 00:00:00"), 80)));
+        assertTrue(unionPrices.contains(new Price("12345", 1, 1, conv("04.01.2013 00:00:00"), conv("07.01.2013 23:59:59"), 81)));
+        assertTrue(unionPrices.contains(new Price("12345", 1, 1, conv("07.01.2013 23:59:59"), conv("09.01.2013 23:59:59"), 82)));
+        assertTrue(unionPrices.contains(new Price("12345", 1, 1, conv("09.01.2013 23:59:59"), conv("12.01.2013 23:59:59"), 83)));
+        assertTrue(unionPrices.contains(new Price("12345", 1, 1, conv("12.01.2013 23:59:59"), conv("14.01.2013 00:00:00"), 84)));
+        assertTrue(unionPrices.contains(new Price("12345", 1, 1, conv("14.01.2013 00:00:00"), conv("17.01.2013 23:59:59"), 85)));
+        assertTrue(unionPrices.contains(new Price("12345", 1, 1, conv("17.01.2013 23:59:59"), conv("19.01.2013 23:59:59"), 86)));
+        assertTrue(unionPrices.contains(new Price("12345", 1, 1, conv("19.01.2013 23:59:59"), conv("20.01.2013 10:58:00"), 87)));
+        assertTrue(unionPrices.contains(new Price("12345", 1, 1, conv("20.01.2013 10:58:00"), conv("20.01.2013 14:36:59"), 81)));
+        assertTrue(unionPrices.contains(new Price("12345", 1, 1, conv("20.01.2013 14:36:59"), conv("22.01.2013 23:59:59"), 87)));
+        assertTrue(unionPrices.contains(new Price("12345", 1, 1, conv("22.01.2013 23:59:59"), conv("25.01.2013 23:59:59"), 88)));
+    }
 }
