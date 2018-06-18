@@ -266,4 +266,28 @@ public class PricesMergerTest {
         assertTrue(unionPrices.contains(new Price("12345", 1, 1, conv("20.01.2013 14:36:59"), conv("22.01.2013 23:59:59"), 87)));
         assertTrue(unionPrices.contains(new Price("12345", 1, 1, conv("22.01.2013 23:59:59"), conv("25.01.2013 23:59:59"), 88)));
     }
+
+    @Test
+    public void testMergePrices1() throws ParseException {
+        List<Price> oldPrices = new ArrayList<>();
+        oldPrices.add(new Price("12345", 1, 1, conv("01.01.2013 00:00:00"), conv("05.01.2013 23:59:59"), 80));
+
+        List<Price> newPrices = new ArrayList<>();
+
+        newPrices.add(new Price("789", 1, 1, conv("04.01.2013 00:00:00"), conv("07.01.2013 23:59:59"), 81));
+
+        PricesMerger merger = new PricesMerger();
+        List<Price> unionPrices = merger.merge(oldPrices, newPrices);
+        unionPrices.stream()
+                .sorted((p1, p2) -> p1.getBegin().compareTo(p2.getBegin()))
+                .forEach(System.out::println);
+
+
+        assertEquals(2, unionPrices.size());
+
+        assertTrue(unionPrices.contains(new Price("12345", 1, 1, conv("01.01.2013 00:00:00"), conv("05.01.2013 23:59:59"), 80)));
+        assertTrue(unionPrices.contains(new Price("789", 1, 1, conv("04.01.2013 00:00:00"), conv("07.01.2013 23:59:59"), 81)));
+    }
+
+
 }

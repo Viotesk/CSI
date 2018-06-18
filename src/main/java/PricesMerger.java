@@ -22,16 +22,17 @@ public class PricesMerger {
             sortedOldPricesMap.get(oldPrice).add(oldPrice);
         });
 
-        for (Price currentMergePrice : sortedOldPricesMap.keySet()) {
-            if(!sortedNewPricesMap.containsKey(currentMergePrice))
-                mergeResultList.addAll(sortedOldPricesMap.get(currentMergePrice));
-            else {
-                for (Price newPrice : sortedNewPricesMap.get(currentMergePrice)) {
-                    sortedOldPricesMap.get(currentMergePrice).addAll(checkPrices(newPrice, sortedOldPricesMap.get(newPrice), false));
+        for (Price newPrice : sortedNewPricesMap.keySet()) {
+            if(sortedOldPricesMap.containsKey(newPrice)) {
+                for (Price price : sortedNewPricesMap.get(newPrice)) {
+                    sortedOldPricesMap.get(newPrice).addAll(checkPrices(price, sortedOldPricesMap.get(newPrice), false));
                 }
-                mergeResultList.addAll(sortedOldPricesMap.get(currentMergePrice));
-            }
+            } else
+                mergeResultList.addAll(sortedNewPricesMap.get(newPrice));
+        }
 
+        for (List<Price> prices : sortedOldPricesMap.values()) {
+            mergeResultList.addAll(prices);
         }
 
         return mergeResultList;
